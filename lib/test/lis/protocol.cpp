@@ -168,8 +168,8 @@ TEST_CASE("Entry Block", "[protocol]") {
         CHECK( lis::decay(entry.size)  == 1  );
         CHECK( lis::decay(entry.reprc) == 56 );
 
-        CHECK( mpark::holds_alternative< lis::i8 >(entry.value) );
-        const auto value = lis::decay( mpark::get< lis::i8 >(entry.value) );
+        CHECK( std::holds_alternative< lis::i8 >(entry.value) );
+        const auto value = lis::decay(std::get< lis::i8 >(entry.value));
         CHECK( value == 0 );
     }
 
@@ -188,8 +188,8 @@ TEST_CASE("Entry Block", "[protocol]") {
         CHECK( lis::decay(entry.size)  == 4  );
         CHECK( lis::decay(entry.reprc) == 65 );
 
-        CHECK( mpark::holds_alternative< lis::string >(entry.value) );
-        const auto value = lis::decay( mpark::get< lis::string >(entry.value) );
+        CHECK(std::holds_alternative< lis::string >(entry.value));
+        const auto value = lis::decay(std::get< lis::string >(entry.value));
         CHECK( value == std::string(".1IN") );
     }
 
@@ -209,8 +209,8 @@ TEST_CASE("Entry Block", "[protocol]") {
         CHECK( lis::decay(entry.size)  == 1  );
         CHECK( lis::decay(entry.reprc) == 56 );
 
-        CHECK( mpark::holds_alternative< lis::i8 >(entry.value) );
-        const auto value = lis::decay( mpark::get< lis::i8 >(entry.value) );
+        CHECK(std::holds_alternative< lis::i8 >(entry.value));
+        const auto value = lis::decay(std::get< lis::i8 >(entry.value));
         CHECK( value == 0 );
     }
 
@@ -412,7 +412,7 @@ TEST_CASE("Data Format Specification Record", "[protocol]") {
 
     const auto entry = formatspec.entries.at(0);
     const auto sb    = formatspec.specs.at(0);
-    const auto spec  = mpark::get< lis::spec_block0 >(sb);
+    const auto spec  = std::get< lis::spec_block0 >(sb);
 
     CHECK( lis::decay(entry.type)  == 0  );
     CHECK( lis::decay(entry.size)  == 1  );
@@ -446,8 +446,8 @@ TEST_CASE("Component Block", "[protocol]") {
         CHECK( lis::decay(component.mnemonic) == std::string("DEPT") );
         CHECK( lis::decay(component.units)    == std::string(".1IN") );
 
-        CHECK( mpark::holds_alternative< lis::i8 >(component.component) );
-        const auto value = lis::decay( mpark::get< lis::i8 >(component.component) );
+        CHECK(std::holds_alternative< lis::i8 >(component.component));
+        const auto value = lis::decay(std::get< lis::i8 >(component.component));
         CHECK( value == 4 );
     }
 
@@ -473,8 +473,8 @@ TEST_CASE("Component Block", "[protocol]") {
         CHECK( lis::decay(component.mnemonic) == std::string("DEPT") );
         CHECK( lis::decay(component.units)    == std::string(".1IN") );
 
-        CHECK( mpark::holds_alternative< lis::string >(component.component) );
-        const auto value = lis::decay( mpark::get< lis::string >(component.component) );
+        CHECK(std::holds_alternative< lis::string >(component.component));
+        const auto value = lis::decay(std::get< lis::string >(component.component));
         CHECK( value == std::string("54") );
     }
 
@@ -501,8 +501,8 @@ TEST_CASE("Component Block", "[protocol]") {
         CHECK( lis::decay(component.mnemonic) == std::string("DEPT") );
         CHECK( lis::decay(component.units)    == std::string(".1IN") );
 
-        CHECK( mpark::holds_alternative< lis::i8 >(component.component) );
-        const auto value = lis::decay( mpark::get< lis::i8 >(component.component) );
+        CHECK(std::holds_alternative< lis::i8 >(component.component));
+        const auto value = lis::decay(std::get< lis::i8 >(component.component));
         CHECK( value == 4 );
     }
 
@@ -619,12 +619,12 @@ TEST_CASE("Information Record", "[protocol]") {
     CHECK( inforec.components.size() == 2 );
 
     auto component = inforec.components.at(0);
-    CHECK( mpark::holds_alternative< lis::string >(component.component) );
-    const auto v0 = lis::decay( mpark::get< lis::string >(component.component) );
+    CHECK(std::holds_alternative< lis::string >(component.component));
+    const auto v0 = lis::decay(std::get< lis::string >(component.component));
     CHECK( v0 == std::string("54") );
 
     component = inforec.components.at(1);
-    CHECK( mpark::holds_alternative< lis::i8 >(component.component) );
-    const auto v1 = lis::decay( mpark::get< lis::i8 >(component.component) );
+    CHECK(std::holds_alternative< lis::i8 >(component.component));
+    const auto v1 = lis::decay(std::get< lis::i8 >(component.component));
     CHECK( v1 == 4 );
 }

@@ -6,9 +6,8 @@
 #include <system_error>
 #include <vector>
 #include <map>
+#include <format>
 
-#include <fmt/core.h>
-#include <fmt/format.h>
 #include <lfp/lfp.h>
 #include <lfp/rp66.h>
 #include <lfp/tapeimage.h>
@@ -28,15 +27,15 @@ dlisio::stream open(const std::string& path, std::int64_t offset)
 noexcept (false) {
     auto* file = dlisio::fopen(path.c_str());
     if (!file) {
-        auto msg = "unable to open file for path {} : {}";
-        throw dlisio::io_error(fmt::format(msg, path, strerror(errno)));
+        const auto msg = "unable to open file for path {} : {}";
+        throw dlisio::io_error(std::format(msg, path, strerror(errno)));
     }
 
     auto* protocol = lfp_cfile_open_at_offset(file, offset);
     if ( protocol == nullptr ) {
         std::fclose(file);
         const auto msg = "lfp: unable to open lfp protocol cfile at tell {}";
-        throw dlisio::io_error(fmt::format(msg, offset));
+        throw dlisio::io_error(std::format(msg, offset));
     }
 
     return dlisio::stream(protocol);
@@ -84,10 +83,10 @@ long long findsul( dlisio::stream& file, int toread ) noexcept (false) {
             return lfrom + offset;
 
         case DLIS_NOTFOUND: {
-            auto msg =
+            const auto msg =
                 "searched {} bytes from offset {} (dec), but could not find "
                 "storage label";
-            throw dlisio::not_found(fmt::format(msg, bytes_read, pfrom));
+            throw dlisio::not_found(std::format(msg, bytes_read, pfrom));
         }
 
         case DLIS_INCONSISTENT: {
@@ -122,7 +121,7 @@ long long findvrl( dlisio::stream& file, int toread ) noexcept (false) {
             const auto msg =
                 "searched {} bytes from offset {} (dec), but could not find "
                 "visible record envelope pattern [0xFF 0x01]";
-            throw dlisio::not_found(fmt::format(msg, bytes_read, pfrom));
+            throw dlisio::not_found(std::format(msg, bytes_read, pfrom));
         }
 
         case DLIS_INCONSISTENT: {
@@ -173,7 +172,7 @@ void findsul(dlisio::stream& file, const dl::error_handler& errorhandler,
             "2.3.2 Storage Unit Label (SUL): The first 80 bytes of the Visible "
                 "Envelope ... constitute a Storage Unit Label.",
             "Unexpected bytes are ignored",
-            fmt::format(debug, pfrom + (offset - lfrom), pfrom));
+            std::format(debug, pfrom + (offset - lfrom), pfrom));
     }
     file.seek(offset);
 }
@@ -206,7 +205,7 @@ void findvrl(dlisio::stream& file,
             "Unexpected bytes found before VR",
             "",
             "Unexpected bytes ignored",
-            fmt::format(debug, pfrom + (offset - lfrom), pfrom));
+            std::format(debug, pfrom + (offset - lfrom), pfrom));
     }
     file.seek(offset);
 }
@@ -256,7 +255,7 @@ noexcept (false) {
                 const auto msg =
                     "bad segment trim: trim size (which is {}) "
                     ">= segment.size() (which is {})";
-                throw std::runtime_error(fmt::format(msg, trim, segment_size));
+                throw std::runtime_error(std::format(msg, trim, segment_size));
             }
 
             errorhandler.log(
@@ -401,7 +400,7 @@ noexcept (false) {
         errorhandler.log(
             dl::error_severity::CRITICAL, context, problem, "",
             "Indexing is suspended at last valid Logical Record",
-            fmt::format(debug, file.ptell(), lr_offset, lrs_offset));
+            std::format(debug, file.ptell(), lr_offset, lrs_offset));
 
         ofs.broken.push_back( lr_offset );
     };
@@ -454,7 +453,7 @@ noexcept (false) {
             const auto problem =
                 "Too short logical record. Length can't be less than 4, "
                 "but was {}";
-            handle(fmt::format(problem, len));
+            handle(std::format(problem, len));
             break;
         }
 
@@ -547,7 +546,7 @@ dl::error_handler& errorhandler) noexcept (false) {
     const auto handle = [&]( const std::string& problem ) {
         const auto context = "dlis::findfdata: Indexing implicit records";
         const auto abs_tell = "Physical tell (end of the record): {} (dec)";
-        const auto debug = fmt::format(abs_tell, file.ptell());
+        const auto debug = std::format(abs_tell, file.ptell());
         errorhandler.log(dl::error_severity::CRITICAL, context, problem, "",
                          "Record is skipped", debug);
     };

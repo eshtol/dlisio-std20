@@ -8,8 +8,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
-
-#include <mpark/variant.hpp>
+#include <variant>
 
 #include <dlisio/dlis/types.h>
 #include <dlisio/dlis/types.hpp>
@@ -33,8 +32,8 @@ namespace dl = dlisio::dlis;
  * type-resolution only has to be done once, and the unstructuring of the
  * vector can be contained inside the visitor.
  */
-using value_vector = mpark::variant<
-    mpark::monostate,
+using value_vector = std::variant<
+    std::monostate,
     std::vector< fshort >,
     std::vector< fsingl >,
     std::vector< fsing1 >,

@@ -30,16 +30,14 @@ endif()
 # into
 add_custom_target(doc ALL)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 20)
 
 test_big_endian(BIG_ENDIAN)
 
 add_subdirectory(external/endianness)
 add_subdirectory(external/catch2)
 
-find_package(fmt           REQUIRED)
 find_package(lfp           REQUIRED)
-find_package(mpark_variant REQUIRED)
 
 add_subdirectory(lib)
 add_subdirectory(python)

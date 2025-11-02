@@ -4,8 +4,7 @@
 #include <cstring>
 #include <string>
 #include <ciso646>
-
-#include <fmt/core.h>
+#include <format>
 
 #include <dlisio/dlis/dlisio.h>
 #include <dlisio/dlis/types.hpp>
@@ -40,7 +39,7 @@ set_descriptor parse_set_descriptor( const char* cur ) noexcept (false) {
                 const auto msg  = "error parsing object set descriptor: "
                                 "expected SET, RSET or RDSET, was {} ({})"
                                 ;
-                throw std::invalid_argument(fmt::format(msg, role, bits));
+                throw std::invalid_argument(std::format(msg, role, bits));
             }
         default:
             throw std::runtime_error("unhandled error in dlis_component_set");
@@ -108,7 +107,7 @@ attribute_descriptor parse_attribute_descriptor( const char* cur ) {
             const auto msg  = "error parsing attribute descriptor: "
                               "expected ATTRIB, INVATR, ABSATR or OBJECT, "
                               "was {} ({})";
-            throw std::invalid_argument(fmt::format(msg, was, bits));
+            throw std::invalid_argument(std::format(msg, was, bits));
             }
         default:
             throw std::runtime_error( "unhandled error in "
@@ -147,7 +146,7 @@ object_descriptor parse_object_descriptor( const char* cur ) {
             const auto msg  = "error parsing object descriptor: "
                             "expected OBJECT, was {} ({})"
                             ;
-            throw std::invalid_argument(fmt::format(msg, was, bits));
+            throw std::invalid_argument(std::format(msg, was, bits));
             }
         default:
             throw std::runtime_error("unhandled error in "
@@ -465,7 +464,7 @@ noexcept (false) {
         const auto code = static_cast< int >(x);
         dl::dlis_error err {
             dl::error_severity::MINOR,
-            fmt::format(msg, code),
+            std::format(msg, code),
             "Appendix B: Representation Codes",
             "Continue. Postpone dealing with this until later"
         };
@@ -502,7 +501,7 @@ const char* elements( const char* xs, dl::object_attribute& attr ) {
     const auto n = dl::decay( attr.count );
 
     if (n == 0) {
-        vec = mpark::monostate{};
+        vec = std::monostate{};
         return xs;
     }
 
@@ -539,7 +538,7 @@ const char* elements( const char* xs, dl::object_attribute& attr ) {
             const auto msg = "unable to interpret attribute: "
                              "unknown representation code {}";
             const auto code = static_cast< int >(reprc);
-            throw std::runtime_error(fmt::format(msg, code));
+            throw std::runtime_error(std::format(msg, code));
         }
     }
 
@@ -552,8 +551,8 @@ struct variant_equal {
         return false;
     }
 
-    bool operator () (mpark::monostate,
-                      mpark::monostate)
+    bool operator () (std::monostate,
+                      std::monostate)
     const noexcept (true) {
         return true;
     }
@@ -570,7 +569,7 @@ struct variant_equal {
 bool value_variant_eq(const dl::value_vector& lhs,
                       const dl::value_vector& rhs)
 noexcept (true) {
-    return mpark::visit(variant_equal{}, lhs, rhs);
+    return std::visit(variant_equal{}, lhs, rhs);
 }
 
 } // namespace
@@ -737,7 +736,7 @@ struct len {
         return vec.size();
     }
 
-    std::size_t operator () ( const mpark::monostate& ) const {
+    std::size_t operator () ( const std::monostate& ) const {
         throw std::invalid_argument( "patch: len() called on monostate" );
     }
 };
@@ -751,7 +750,7 @@ struct shrink {
         vec.resize(this->size);
     }
 
-    void operator () ( const mpark::monostate& ) const  {
+    void operator () ( const std::monostate& ) const  {
         throw std::invalid_argument( "patch: shrink() called on monostate" );
     }
 };
@@ -767,8 +766,8 @@ noexcept (false)
      * value is *NOT* monostate, i.e. there is a default value.  if count !=
      * values.size(), resize it.
      */
-    if (!mpark::holds_alternative< mpark::monostate >(value)) {
-        const auto size = mpark::visit( len(), value );
+    if (!std::holds_alternative< std::monostate >(value)) {
+        const auto size = std::visit( len(), value );
         /* same size, so return */
         if (size == count) return;
 
@@ -779,10 +778,10 @@ noexcept (false)
                 "template value is not overridden by object attribute, but "
                 "count is. count ({}) < template count ({})";
 
-            mpark::visit( shrink( count ), value );
+            std::visit( shrink( count ), value );
             dlis_error err {
                 dl::error_severity::MAJOR,
-                fmt::format(msg, count, size),
+                std::format(msg, count, size),
                 "3.2.2.1 Component Descriptor: The number of Elements that "
                     "make up the Value is specified by the Count "
                     "Characteristic.",
@@ -802,7 +801,7 @@ noexcept (false)
 
         dlis_error err {
             dl::error_severity::CRITICAL,
-            fmt::format(msg, count, size),
+            std::format(msg, count, size),
             "3.2.2.1 Component Descriptor: The number of Elements that "
                 "make up the Value is specified by the Count "
                 "Characteristic.",
@@ -861,7 +860,7 @@ noexcept (false)
             const auto code = static_cast< int >(reprc);
             dl::dlis_error err {
                 dl::error_severity::CRITICAL,
-                fmt::format(msg, code),
+                std::format(msg, code),
                 "Appendix B: Representation Codes",
                 "attribute value is left as template default. Continue"
             };
@@ -981,7 +980,7 @@ const char* object_set::parse_objects(const char* cur) noexcept (false) {
              * This is functionally equivalent to the value being marked absent
              */
             if (count == 0) {
-                attr.value = mpark::monostate{};
+                attr.value = std::monostate{};
             } else if (!flags.value) {
                 /*
                  * Count is non-zero, but there's no value for this attribute.
@@ -1001,13 +1000,13 @@ const char* object_set::parse_objects(const char* cur) noexcept (false) {
                     const auto code = static_cast< int >(attr.reprc);
                     dlis_error err {
                         dl::error_severity::MAJOR,
-                        fmt::format(msg, count, code),
+                        std::format(msg, count, code),
                         "",
                         "value defaulted based on representation code from "
                             "attribute"
                     };
                     attr.log.push_back(err);
-                    attr.value = mpark::monostate{};
+                    attr.value = std::monostate{};
                 }
 
                 patch_missing_value( attr );

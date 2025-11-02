@@ -39,12 +39,8 @@ target_compile_definitions(dlisio
     $<$<BOOL:${BIG_ENDIAN}>:HOST_BIG_ENDIAN>
     $<$<NOT:$<BOOL:${BIG_ENDIAN}>>:HOST_LITTLE_ENDIAN>
 )
-target_link_libraries(dlisio
-    PUBLIC mpark_variant
-           lfp::lfp
+target_link_libraries(dlisio PUBLIC lfp::lfp)
 
-    PRIVATE fmt::fmt-header-only
-)
 install(TARGETS dlisio
         EXPORT dlisio
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}

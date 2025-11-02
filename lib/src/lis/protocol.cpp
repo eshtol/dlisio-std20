@@ -1,10 +1,8 @@
 #include <cstdint>
 #include <cstring>
 #include <algorithm>
-#include <cstring>
 #include <type_traits>
-
-#include <fmt/core.h>
+#include <format>
 
 #include <dlisio/exception.hpp>
 #include <dlisio/lis/protocol.hpp>
@@ -311,7 +309,7 @@ noexcept (false) {
             const auto msg = "unable to interpret attribute: "
                              "unknown representation code {}";
             const auto code = lis::decay(reprc);
-            throw std::runtime_error(fmt::format(msg, code));
+            throw std::runtime_error(std::format(msg, code));
         }
     }
 
@@ -322,7 +320,7 @@ void validate_entry( const lis::entry_block& entry ) {
     const auto type = lis::decay(entry.type);
     if ( type > int(lis::entry_type::spec_bloc_subtype) ) {
         const auto msg = "lis::validate_entry: unknown entry type {}";
-        throw std::runtime_error( fmt::format(msg, type) );
+        throw std::runtime_error(std::format(msg, type));
     }
 
     const auto size = lis::decay(entry.size);
@@ -336,14 +334,14 @@ void validate_entry( const lis::entry_block& entry ) {
         const auto msg = "lis::validate_entry: unknown representation code {} "
                          "for entry (type: {})";
         const auto code = lis::decay(reprc);
-        throw std::runtime_error(fmt::format(msg, code, type));
+        throw std::runtime_error(std::format(msg, code, type));
     }
 
     if (size != reprc_size and size > 0 and reprc_size != LIS_VARIABLE_LENGTH) {
         const auto msg = "lis::validate_entry: invalid entry (type: {}). "
                          "Expected size for reprc {} is {}, was {}";
-        throw std::runtime_error( fmt::format(msg, type, reprc, reprc_size,
-                                              size) );
+        throw std::runtime_error(std::format(msg, type, reprc, reprc_size,
+                                              size));
     }
 
 }
@@ -359,8 +357,8 @@ noexcept (false) {
         const auto msg = "lis::entry_block: "
                          "{} bytes left in record, expected at least {}";
         const auto left = std::distance(cur, end);
-        throw std::runtime_error( fmt::format(
-                    msg, left, lis::entry_block::fixed_size) );
+        throw std::runtime_error(std::format(
+                    msg, left, lis::entry_block::fixed_size));
     }
 
     lis::entry_block entry;
@@ -375,7 +373,7 @@ noexcept (false) {
         const auto msg = "lis::entry_block: "
                          "{} bytes left in record, expected at least {}";
         const auto left = std::distance(cur, end);
-        throw std::runtime_error(fmt::format(msg, left, lis::decay(entry.size)));
+        throw std::runtime_error(std::format(msg, left, lis::decay(entry.size)));
     }
 
     if ( lis::decay(entry.size) != 0 )
@@ -415,7 +413,7 @@ private:
 
 bool contains_numeric( const lis::value_type& x, float val )
 noexcept (false) {
-    return mpark::visit(contains_numeric_value{val}, x);
+    return std::visit(contains_numeric_value{val}, x);
 }
 
 template < typename T >
@@ -426,7 +424,7 @@ noexcept (false) {
         const auto msg = "lis::spec_block: "
                          "{} bytes left in record, expected at least {}";
         const auto left = std::distance(cur, end);
-        throw std::runtime_error(fmt::format(msg, left, T::size));
+        throw std::runtime_error(std::format(msg, left, T::size));
     }
 
     constexpr int padbyte = 1;
@@ -568,7 +566,7 @@ void validate_component( const lis::component_block& component ) {
             const auto mnem = lis::decay(component.mnemonic);
             const auto msg = "lis::validate_component: unknown component type {} "
                              "in component {}";
-            throw std::runtime_error( fmt::format(msg, type, mnem) );
+            throw std::runtime_error(std::format(msg, type, mnem));
         }
     }
 
@@ -584,7 +582,7 @@ void validate_component( const lis::component_block& component ) {
                          "in component {}";
         const auto mnem = lis::decay(component.mnemonic);
         const auto code = lis::decay(reprc);
-        throw std::runtime_error(fmt::format(msg, code, mnem));
+        throw std::runtime_error(std::format(msg, code, mnem));
     }
 
     if (size != reprc_size and size > 0 and reprc_size != LIS_VARIABLE_LENGTH) {
@@ -592,7 +590,7 @@ void validate_component( const lis::component_block& component ) {
             "lis::validate_component: invalid component (mnem: {}). "
             "Expected size for reprc {} is {}, was {}";
         const auto mnem = lis::decay(component.mnemonic);
-        throw std::runtime_error(fmt::format(msg, mnem, reprc, reprc_size, size));
+        throw std::runtime_error(std::format(msg, mnem, reprc, reprc_size, size));
     }
 }
 
@@ -607,8 +605,8 @@ noexcept (false) {
         const auto msg = "lis::component_block: "
                          "{} bytes left in record, expected at least {}";
         const auto left = std::distance(cur, end);
-        throw std::runtime_error( fmt::format(
-                    msg, left, lis::component_block::fixed_size) );
+        throw std::runtime_error(std::format(
+                    msg, left, lis::component_block::fixed_size));
     }
 
     lis::component_block component;
@@ -626,7 +624,7 @@ noexcept (false) {
         const auto msg = "lis::component_block: "
                          "{} bytes left in record, expected at least {}";
         const auto left = std::distance(cur, end);
-        throw std::runtime_error(fmt::format(msg, left, lis::decay(component.size)));
+        throw std::runtime_error(std::format(msg, left, lis::decay(component.size)));
     }
 
     if ( lis::decay(component.size) != 0 )
@@ -661,7 +659,7 @@ noexcept (false) {
         const auto type = lis::decay(raw.info.type);
         const auto type_str = lis::record_type_str(raw.info.type);
         const auto msg = "parse_text_record: Invalid record type, {} ({})";
-        throw std::runtime_error(fmt::format(msg, type, type_str));
+        throw std::runtime_error(std::format(msg, static_cast<int>(type), type_str));
     }
     lis::text_record rec;
     rec.type = raw.info.type;
@@ -688,7 +686,7 @@ void parse_file_record( const record& raw, T& rec ) noexcept (false) {
         const auto type = lis::decay(raw.info.type);
         const auto type_str = lis::record_type_str(raw.info.type);
         const auto msg = "parse_file_record: Invalid record type, {} ({})";
-        throw std::runtime_error(fmt::format(msg, type, type_str));
+        throw std::runtime_error(std::format(msg, static_cast<int>(type), type_str));
     }
 
     if ( raw.data.size() < T::size ) {
@@ -696,8 +694,7 @@ void parse_file_record( const record& raw, T& rec ) noexcept (false) {
         const auto type_str = lis::record_type_str(raw.info.type);
         const auto msg = "parse_file_record: Unable to parse record, "
                          "{} Records are {} bytes, raw record is only {}";
-        throw std::runtime_error(
-                fmt::format(msg, type_str, T::size, raw.data.size()) );
+        throw std::runtime_error(std::format(msg, type_str, T::size, raw.data.size()));
     }
 
     constexpr int BLANK = 1;
@@ -759,14 +756,14 @@ void parse_reel_tape_record( const record& raw, T& rec ) {
         const auto type = lis::decay(raw.info.type);
         const auto type_str = lis::record_type_str(raw.info.type);
         const auto msg = "parse_reel_tape_record: Invalid record type, {} ({})";
-        throw std::runtime_error(fmt::format(msg, type, type_str));
+        throw std::runtime_error(std::format(msg, static_cast<int>(type), type_str));
     }
 
     if ( raw.data.size() < T::size ) {
         //TODO log when too many bytes
         const auto msg = "Unable to parse record. "
                          "Expected {} bytes, raw record is only {}";
-        throw std::runtime_error(fmt::format(msg, T::size, raw.data.size()));
+        throw std::runtime_error(std::format(msg, T::size, raw.data.size()));
     }
 
     constexpr int BLANK = 1;

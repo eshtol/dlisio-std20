@@ -3,12 +3,11 @@
 #include <string>
 #include <cassert>
 #include <numeric>
+#include <algorithm>
+#include <format>
 
 #include <lfp/lfp.h>
 #include <lfp/tapeimage.h>
-
-#include <fmt/core.h>
-#include <fmt/format.h>
 
 #include <dlisio/lis/protocol.hpp>
 #include <dlisio/lis/io.hpp>
@@ -69,7 +68,7 @@ noexcept (false) {
 
     if ( curr_dfsr == this->expls.end() ){
         const auto msg = "Could not find DFS record at tell {}";
-        throw std::invalid_argument(fmt::format(msg, dfsr_tell));
+        throw std::invalid_argument(std::format(msg, dfsr_tell));
     }
 
     // Find the next DFS record in the index, if any
@@ -173,19 +172,19 @@ lis::prheader iodevice::read_physical_header() noexcept (false) {
         const auto where = "iodevice::read_physical_header: {}";
         if ( this->eof() and (nread == 0 or lis::is_padbytes(buf, bufsize)) ) {
             const auto what = "end-of-file";
-            throw dlisio::eof_error( fmt::format( where, what ) );
+            throw dlisio::eof_error(std::format( where, what ));
         }
 
         else if ( this->eof() ) {
             // TODO This might be symptom of our alignment assumption
             //      being wrong. should inform about that somehow
             const auto what = "unexpected end-of-file";
-            throw dlisio::truncation_error( fmt::format( where, what ) );
+            throw dlisio::truncation_error(std::format( where, what ));
         }
 
         else {
             const auto what = "Unable to read from file";
-            throw dlisio::io_error( fmt::format( where, what ) );
+            throw dlisio::io_error(std::format( where, what ));
         }
     };
 
@@ -239,9 +238,9 @@ lis::prheader iodevice::read_physical_header() noexcept (false) {
     if ( head.attributes & lis::prheader::chcksum ) mvl += 2;
 
     if ( head.length < mvl ) {
-        std::string where = "iodevice::read_physical_header: ";
-        std::string what  = "Too short record length (was {} bytes)";
-        throw std::runtime_error(where + fmt::format(what, head.length));
+        const auto where = "iodevice::read_physical_header: ";
+        const auto what  = "Too short record length (was {} bytes)";
+        throw std::runtime_error(where + std::format(what, head.length));
     }
 
     return head;
@@ -349,10 +348,10 @@ lis::record_info iodevice::index_record() noexcept (false) {
         lrh = this->read_logical_header();
     } catch( const dlisio::eof_error& e ) {
         const auto msg =  "iodevice::index_record: {}";
-        throw dlisio::truncation_error( fmt::format(msg, e.what()) );
+        throw dlisio::truncation_error(std::format(msg, e.what()));
     } catch( const dlisio::io_error& e ) {
         const auto msg =  "iodevice::index_record: {}";
-        throw dlisio::truncation_error( fmt::format(msg, e.what()) );
+        throw dlisio::truncation_error(std::format(msg, e.what()));
     }
 
     if ( not lis::valid_rectype( lrh.type ) ) {
@@ -365,7 +364,7 @@ lis::record_info iodevice::index_record() noexcept (false) {
                          "Found invalid record type ({}) when reading "
                          "header at ptell ({})";
         const auto tell = this->ptell() - lis::lrheader::size;
-        throw std::runtime_error(fmt::format( msg, lis::decay(lrh.type), tell));
+        throw std::runtime_error(std::format( msg, lis::decay(lrh.type), tell));
     }
 
     while ( true ) {
@@ -396,7 +395,7 @@ lis::record_info iodevice::index_record() noexcept (false) {
             attributes.push_back( prh.attributes );
         } catch( const dlisio::eof_error& e ) {
             const auto msg = "iodevice::index_record: Missing next PRH. ({})";
-            throw dlisio::truncation_error( fmt::format(msg, e.what()) );
+            throw dlisio::truncation_error(std::format(msg, e.what()));
         }
     }
 
@@ -578,8 +577,8 @@ iodevice open( const std::string& path, std::int64_t offset, bool tapeimage )
 noexcept (false) {
     auto* file = dlisio::fopen(path.c_str());
     if ( not file ) {
-        auto msg = "lis::open: unable to open file for path {} : {}";
-        throw dlisio::io_error(fmt::format(msg, path, strerror(errno)));
+        const auto msg = "lis::open: unable to open file for path {} : {}";
+        throw dlisio::io_error(std::format(msg, path, strerror(errno)));
     }
 
     auto* protocol = lfp_cfile_open_at_offset(file, offset);
@@ -587,7 +586,7 @@ noexcept (false) {
         std::fclose(file);
         const auto msg = "lis::open: "
                          "unable to open lfp protocol cfile at tell {}";
-        throw dlisio::io_error(fmt::format(msg, offset));
+        throw dlisio::io_error(std::format(msg, offset));
     }
 
     if ( tapeimage ) {
@@ -610,13 +609,13 @@ noexcept (false) {
         device.close();
         const auto msg = "lis::open: "
                             "Cannot open lis::iodevice (ptell={}): {}";
-        throw dlisio::io_error( fmt::format(msg, offset, e.what() ));
+        throw dlisio::io_error(std::format(msg, offset, e.what()));
     }
 
     if ( device.eof() ) {
         device.close();
         const auto msg = "open: handle is opened at EOF (ptell={})";
-        throw dlisio::eof_error( fmt::format(msg, offset) );
+        throw dlisio::eof_error(std::format(msg, offset));
     }
 
     try {
@@ -625,7 +624,7 @@ noexcept (false) {
         device.close();
         const auto msg = "lis::open: "
                          "Could not rewind lis::iodevice to ptell {}: {}";
-        throw dlisio::io_error( fmt::format(msg, offset, e.what()) );
+        throw dlisio::io_error(std::format(msg, offset, e.what()));
     }
 
     return device;

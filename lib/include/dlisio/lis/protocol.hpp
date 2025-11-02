@@ -4,8 +4,7 @@
 #include <cstdint>
 #include <ciso646>
 #include <vector>
-
-#include <mpark/variant.hpp>
+#include <variant>
 
 #include <dlisio/lis/types.hpp>
 
@@ -173,8 +172,8 @@ struct record {
     std::vector< char > data;
 };
 
-using value_type = mpark::variant<
-    mpark::monostate,
+using value_type = std::variant<
+    std::monostate,
     lis::i8,
     lis::i16,
     lis::i32,
@@ -293,7 +292,7 @@ struct process_indicators {
 spec_block0 read_spec_block0(const record&, std::size_t) noexcept (false);
 spec_block1 read_spec_block1(const record&, std::size_t) noexcept (false);
 
-using spec_block_type = mpark::variant<
+using spec_block_type = std::variant<
     lis::spec_block0,
     lis::spec_block1
 >;
